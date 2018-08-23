@@ -18,10 +18,13 @@ Quandl.api_key("Akx24vw1x3ziugMZeuY3")
 Bajar_Precios <- function(Columns, Tickers, Fecha_In, Fecha_Fn) {
   
   # Peticion para descargar precios
-  Datos <- Quandl.datatable(code = "WIKI/PRICES", qopts.columns=Columns, ticker=Tickers,
+  Datos <- Quandl.datatable("WIKI/PRICES", qopts.columns=Columns, ticker=Tickers,
                             date.gte=Fecha_In, date.lte=Fecha_Fn)
   return(Datos)
 }
+
+#El error era poner code = "wiki/prices", entonces borre lo que decia code.
+#Tambien hay que checar bien la API key.
 
 #Aqui creamos los argumentos que se necesitan para la funcion que creamos
 tk <- c("TSLA", "BBY","HD") #tickers #con la 'c' le dices que es un vector
@@ -39,3 +42,22 @@ for(i in 1:length(tk)) {
 #Recordamos que para los for y funciones, aqui van entre llaves, como en python es
 #gracias a la identacion
 
+names(Datos) <- tk
+#con 'names' cambiamos los nombres de las columnas por lo que quieras, en este caso
+#por los tickers.
+
+for(i in 1:length(tk)){
+  Datos[[i]]$adj_close_r <- c(0, diff(log(Datos[[i]]$adj_close)))
+  }
+
+Rends <- xts(x = cbind(Datos[[1]]$adj_close_r, Datos[[2]]$adj_close_r, Datos[[3]]$adj_close_r),
+             order.by = Datos[[1]]$date)[-1] #el -1 quita el ultimo valor, el rendimiento 0.
+
+#aqui solo esta creando una lista, una lista con los rendimientos de los tres activos
+#y los esta ordenando por el indice de la fecha. es por eso que es objeto 'xts'
+
+names(Rends) <- tk
+#aqui otra vez le cambiamos los nombres de las columnas por los tickers.
+
+#el tipo de objeto que arroja Rends o Datos es un tipo de objeto 'xts'.
+#un xts es como una DataFrame pero sus indices son las fechas siempre.
