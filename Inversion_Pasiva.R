@@ -61,3 +61,20 @@ names(Rends) <- tk
 
 #el tipo de objeto que arroja Rends o Datos es un tipo de objeto 'xts'.
 #un xts es como una DataFrame pero sus indices son las fechas siempre.
+
+Port1 <- portfolio.spec(assets = tk) #te da los pesos igual
+
+#Restricciones para el portafolio
+
+Port1 <- add.constraint(portfolio = Port1, type = "full_investment")
+#Nos aseguramos de que la suma de los pesos sea 1
+
+Port1 <- add.constraint(portfolio = Port1, type = "box",
+                        min = c(.01,.01,.01), max = c(.7,.7,.7))
+#creo que si le pones solo un numero, toma ese minimo o maximo para todos los activos
+
+Port1 <- add.objective(portfolio = Port1, type = "return", name = "mean")
+
+Port1 <- optimize.portfolio(R = Rends, portfolio = Port1,
+                            optimize_method = "random",
+                            trace = TRUE, search_size = 500)
