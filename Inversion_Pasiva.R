@@ -77,4 +77,35 @@ Port1 <- add.objective(portfolio = Port1, type = "return", name = "mean")
 
 Port1 <- optimize.portfolio(R = Rends, portfolio = Port1,
                             optimize_method = "random",
-                            trace = TRUE, search_size = 500)
+                            trace = TRUE, search_size = 5000)
+
+Portafolios <- vector("list", length = length(Port1$random_portfolio_objective_results))
+
+for(i in 1:length(Port1$random_portfolio_objective_results)) {
+  
+  Portafolios[[i]]$Pesos <- Port1$random_portfolio_objective_results[[i]]$weights
+  #estamos en el vector vacio que creamos, llamado Portafolio, llenandolo con los 
+  #valores aleatoreos que creo de la nube de portafolios de las funciones de la libreria
+  #que hicimos con Port1. Entonces en este caso, dentro del objeto nuevo Portafolio
+  #vamos a crear una nueva variable llamada pesos, y cada iteracion va a guardar
+  #los pesos aleatoreos que encontro de la funcion.
+  Portafolios[[i]]$Medias <- Port1$random_portfolio_objective_results[[i]]$objective_measures$mean
+  #lo mismo que la variable anterior, pero ahora estamos guardando los valores esperados
+  Portafolios[[i]]$Vars <- var.portfolio(R = Port1$R, weights = Portafolios[[i]]$Pesos)
+  #R son los rendimientos
+  names(Portafolios[[i]]$Medias) <- NULL
+  #esto se hizo porque se estaban guardando el vector medias, tambien el nombre de cada
+  #activo, es por esto que con esta linea se borra el nombre y se quedan lo puros numeros
+}
+
+df_Portafolios <- data.frame(matrix(nrow = length(Port1$random_portfolio_objective_results),
+                                    ncol = 3,
+                                    data = 0))
+#primero se crea la matriz (que pueden tener un solo tipo de dato), con la cantidad
+#de filas que obtivumos de portafolios aleatorios,por eso depende de la longitud,
+#luego 3 columnas (peso, media, var) y con el numero 0.
+#Ya que se crea la matriz, se hace dataFrame, que es como una matriz pero soporta
+#todo tipo de datos.
+
+colnames(df_Portafolios) <- c("Rend","Var","Clase")
+#Edita el nombre de las columnas.
