@@ -109,3 +109,32 @@ df_Portafolios <- data.frame(matrix(nrow = length(Port1$random_portfolio_objecti
 
 colnames(df_Portafolios) <- c("Rend","Var","Clase")
 #Edita el nombre de las columnas.
+
+Capital_Inicial <- 10000
+
+for(i in i:length(Port1$random_portfolio_objective_results)) {
+  
+  #Aqui estamos haciendo las medias anuales, porque estaban diarias.
+  #Y rendondeamos el numero a 4 decimales.
+  df_Portafolios$Rend[i] <- round(Portafolios[[i]]$Medias*252,4)
+  #Siempre que quieres entrar al elemento de una lista es doble corchete
+  #Si quieres indexar, es un solo corchete.
+  df_Portafolios$Var[i] <- round(sqrt(Portafolios[[i]]$Vars)*sqrt(252),4)
+  #Aqui estamos anualizando tambien, pero como hablamos de varianza,
+  #tenemos que sacarle raiz cuadrada... Primero se obtiene la desv. est.
+  #y luego se analiza con la raiz del plazo (sqrt(T))
+  df_Portafolios$Clase[i] <- "No-Frontera"
+  #En clase se acomularan las que estan en la frontera eficiente
+  
+  for(k in 1:length(tk)) {
+  
+    df_Portafolios[i, paste("Peso_", tk[k], sep = "")] <- Portafolios[[i]]$Pesos[k]
+    #el comando paste es para pegar cadenas de texto.
+    
+    df_Portafolios[i, paste("Titulos_ini_", tk[k], sep = "")] <- 
+      (Capital_Inicial*Portafolios[[i]]$Pesos[k])%/%Datos[[k]]$adj_close[1]
+    #el operador %/% es para modulo, esto es porque no podemos comprar
+    #fracciones de titulos
+  }
+}
+
